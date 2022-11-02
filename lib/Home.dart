@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:newsapp/catagery.dart';
 import 'package:newsapp/content.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'models.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -51,20 +53,17 @@ class _HomeState extends State<Home> {
   bool isLoading = true;
   String? url;
   getNewsByQuery(String query, List p) async {
-    Map element ;
-    int i=0;
-      url =
-          "https://newsapi.org/v2/everything?q=$query&sortBy=publishedAt&apiKey=63648439610949cab1368fbed94827eb";
+    Map element;
+    int i = 0;
+    url =
+        "https://newsapi.org/v2/everything?q=$query&sortBy=publishedAt&apiKey=63648439610949cab1368fbed94827eb";
     Response response = await get(Uri.parse(url!));
     Map data = jsonDecode(response.body);
     // print(data);
-    setState(()
-    {
+    setState(() {
       // data["articles"].forEach((element)
-      for(element in data["articles"])
-      {
-        try{
-
+      for (element in data["articles"]) {
+        try {
           i++;
           NewsQueryModel newsQueryModel = new NewsQueryModel();
           newsQueryModel = NewsQueryModel.fromMap(element);
@@ -73,15 +72,13 @@ class _HomeState extends State<Home> {
           setState(() {
             isLoading = false;
           });
-          if(i==50)
-            break;
+          if (i == 50) break;
+        } catch (e) {
+          print(e);
         }
-        catch(e){
-          print(e) ;
-        };
-
-      };
-
+        ;
+      }
+      ;
     });
   }
 
@@ -97,12 +94,10 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("News App" , style: TextStyle(
-          color: Colors.tealAccent,
-        ),),
-        elevation: 0.2,
         centerTitle: true,
-        backgroundColor: Colors.black26,
+        title: const Text('News' ,style: TextStyle(
+          color: Colors.tealAccent
+        ),),
       ),
       body: Container(
           padding: EdgeInsets.all(20),
@@ -119,16 +114,11 @@ class _HomeState extends State<Home> {
                     ser.clear();
                   },
                   onSubmitted: (value) {
-                    // if (value.isEmpty) {
-                    //   MaterialState.focused ;
-                    //
-                    // } else
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                catagery(nav: ser.text ),
-                          ));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => catagery(nav: ser.text),
+                        ));
                   },
                   decoration: InputDecoration(
                     label: Text("Search"),
@@ -180,14 +170,13 @@ class _HomeState extends State<Home> {
                 SizedBox(
                   height: 22,
                 ),
-
                 Container(
                   child: isLoading
-                      ? CircularProgressIndicator()
-                      :
-                  CarouselSlider(
-                          options:
-                          CarouselOptions(
+                      ? CircularProgressIndicator(
+                          backgroundColor: Colors.tealAccent,
+                        )
+                      : CarouselSlider(
+                          options: CarouselOptions(
                             // height: MediaQuery.of(context).size.height,
                             autoPlay: true,
                             height: 220,
@@ -196,59 +185,150 @@ class _HomeState extends State<Home> {
                           ),
                           items: crousallist.map((i) {
                             return Builder(
-                              builder: (BuildContext context) {
-                                try{
-                                return Container(
-                                  child: Card(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Image.network(
-                                            i.newsImg,
-                                            fit: BoxFit.cover,
-                                          ),
+                              builder: (BuildContext context ,) {
+                                try {
+                                  return Container(
+                                    child: InkWell(
+                                      onTap: (){
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Scaffold(
+                                                    appBar: AppBar(
+                                                      centerTitle: true,
+                                                      title: Text("News Content",style: TextStyle(
+                                                          color: Colors.tealAccent
+                                                      ),),
+                                                    ),
+                                                    body : SingleChildScrollView(
+                                                      child: Column(
+                                                        children: [
+                                                          Divider(),
+                                                          Text("News Image",style: TextStyle(
+                                                              color: Colors.tealAccent
+                                                          ),) ,
+                                                          Divider(),
+                                                          Container(
+                                                            padding:
+                                                            EdgeInsets.all(10),
+                                                            child: ClipRRect(
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(20),
+                                                                child: Image.network(
+                                                                  i.newsImg,
+                                                                  fit: BoxFit.cover,
+                                                                )),
+                                                          ),
+                                                          Divider(),
+                                                          Text("News Link",style: TextStyle(
+                                                              color: Colors.tealAccent
+                                                          ),) ,
+                                                          Divider(),
+                                                          Container(
+                                                            padding:
+                                                            EdgeInsets.all(10),
+                                                            child: Linkify(
+                                                              text: i.newsUrl,
+                                                              style: TextStyle(color: Colors.blue),
+                                                              linkStyle: TextStyle(color: Colors.green),
+                                                            ),
+                                                          ),
+                                                          Divider(),
+                                                          Text("News Headline",style: TextStyle(
+                                                              color: Colors.tealAccent
+                                                          ),) ,
+                                                          Divider(),
+                                                          Container(
+                                                            padding:
+                                                            EdgeInsets.all(10),
+                                                            child: Text(
+                                                                i.newsHead),
+                                                          ),
+                                                          Divider(),
+                                                          Text("News Description",style: TextStyle(
+                                                              color: Colors.tealAccent
+                                                          ),) ,
+                                                          Divider(),
+                                                          Container(
+                                                            padding:
+                                                            EdgeInsets.all(10),
+                                                            child: Text(
+                                                                i.newsDec),
+                                                          ),
+                                                          Divider(),
+                                                          Text("News Author",style: TextStyle(
+                                                              color: Colors.tealAccent
+                                                          ),) ,
+                                                          Divider(),
+                                                          Container(
+                                                            padding:
+                                                            EdgeInsets.all(10),
+                                                            child: Text(
+                                                                    i.author),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                            ));
+                                      },
+                                      child: Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
-                                        Positioned(
-                                            bottom: 3,
-                                            left: 10,
-                                            right: 0,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                    begin: Alignment.topCenter,
-                                                    end: Alignment.bottomCenter,
-                                                    colors: [
-                                                      Colors.black12
-                                                          .withOpacity(0),
-                                                      Colors.black,
-                                                    ]),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Image.network(
+                                                i.newsImg,
+                                                fit: BoxFit.cover,
                                               ),
-                                              child: Text(
-                                                i.newsHead,
-                                                style: TextStyle(
-                                                  fontSize: 22,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            )
-                                        )
-                                      ],
+                                            ),
+                                            Positioned(
+                                                bottom: 3,
+                                                left: 10,
+                                                right: 0,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                        begin:
+                                                            Alignment.topCenter,
+                                                        end: Alignment
+                                                            .bottomCenter,
+                                                        colors: [
+                                                          Colors.black12
+                                                              .withOpacity(0),
+                                                          Colors.black,
+                                                        ]),
+                                                  ),
+                                                  child: Text(
+                                                    i.newsHead,
+                                                    style: TextStyle(
+                                                      fontSize: 22,
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ))
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                );
-                                }catch(e){print(e);
-                                return Container() ; } ;
+                                  );
+                                } catch (e) {
+                                  print(e);
+                                  return Container();
+                                }
+                                ;
                               },
                             );
                           }).toList(),
                         ),
-
-          ),
+                ),
                 SizedBox(
                   height: 22,
                 ),
@@ -260,7 +340,7 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Latest news",
+                            "Headlines",
                             style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.bold,
@@ -271,97 +351,199 @@ class _HomeState extends State<Home> {
                       ),
                       Container(
                         child: isLoading
-                            ? CircularProgressIndicator()
+                            ? CircularProgressIndicator(
+                                backgroundColor: Colors.tealAccent,
+                              )
                             : Container(
-                              child: ListView.builder(
+                                child: ListView.builder(
                                   scrollDirection: Axis.vertical,
-                                physics: NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
                                   itemCount: newslist.length,
                                   itemBuilder: (context, index) {
-                                    try{
-                                    return Container(
-                                      padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                                      child: InkWell(
-                                        onTap: () {
-                                          // Navigator.push(context, MaterialPageRoute(builder: (context) => Content(ind: index),)) ;
-                                        },
-                                        child: Card(
-                                          elevation: 02,
-                                          shape: RoundedRectangleBorder(),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Stack(
-                                              children: [
-                                                ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(20),
-                                                    child: Image.network(
-                                                      newslist[index].newsImg,
-                                                      fit: BoxFit.cover,
-                                                    )),
-                                                Positioned(
-                                                  bottom: 0,
-                                                  left: 0,
-                                                  right: 0,
-                                                  child: Column(children: [
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                        gradient: LinearGradient(
-                                                            begin: Alignment
-                                                                .topCenter,
-                                                            end: Alignment
-                                                                .bottomCenter,
-                                                            colors: [
-                                                              Colors.black12
-                                                                  .withOpacity(0),
-                                                              Colors.black,
-                                                            ]),
-                                                      ),
-                                                      child: Text(
-                                                        newslist[index].newsHead,
-                                                        style: TextStyle(
-                                                          fontSize: 22,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.white,
+                                    try {
+                                      return Container(
+                                        padding:
+                                            EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                        child: InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Scaffold(
+                                                        appBar: AppBar(
+                                                          centerTitle: true,
+                                                          title: Text("News Content",style: TextStyle(
+                                                              color: Colors.tealAccent
+                                                          ),),
                                                         ),
-                                                      ),
+                                                       body : SingleChildScrollView(
+                                                    child: Column(
+                                                      children: [
+                                                        Divider(),
+                                                        Text("News Image",style: TextStyle(
+                                                            color: Colors.tealAccent
+                                                        ),) ,
+                                                        Divider(),
+                                                        Container(
+                                                          padding:
+                                                          EdgeInsets.all(10),
+                                                         child: ClipRRect(
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(20),
+                                                              child: Image.network(
+                                                                newslist[index]
+                                                                    .newsImg,
+                                                                fit: BoxFit.cover,
+                                                              )),
+                                                        ),
+                                                        Divider(),
+                                                        Text("News Link",style: TextStyle(
+                                                            color: Colors.tealAccent
+                                                        ),) ,
+                                                        Divider(),
+                                                        Container(
+                                                          padding:
+                                                          EdgeInsets.all(10),
+                                                          child: Linkify(
+                                                            text: newslist[index].newsUrl,
+                                                            style: TextStyle(color: Colors.blue),
+                                                            linkStyle: TextStyle(color: Colors.green),
+                                                          ),
+                                                        ),
+                                                        Divider(),
+                                                        Text("News Headline",style: TextStyle(
+                                                            color: Colors.tealAccent
+                                                        ),) ,
+                                                        Divider(),
+                                                        Container(
+                                                          padding:
+                                                          EdgeInsets.all(10),
+                                                          child: Text(
+                                                              newslist[index]
+                                                                  .newsHead),
+                                                        ),
+                                                        Divider(),
+                                                        Text("News Description",style: TextStyle(
+                                                            color: Colors.tealAccent
+                                                        ),) ,
+                                                        Divider(),
+                                                        Container(
+                                                            padding:
+                                                                EdgeInsets.all(10),
+                                                            child: Text(
+                                                                newslist[index]
+                                                                    .newsDec),
+                                                        ),
+                                                        Divider(),
+                                                        Text("News Author",style: TextStyle(
+                                                            color: Colors.tealAccent
+                                                        ),) ,
+                                                        Divider(),
+                                                        Container(
+                                                          padding:
+                                                          EdgeInsets.all(10),
+                                                          child: Text(
+                                                              newslist[index]
+                                                                  .author),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                        gradient: LinearGradient(
-                                                            begin: Alignment
-                                                                .topCenter,
-                                                            end: Alignment
-                                                                .bottomCenter,
-                                                            colors: [
-                                                              Colors.black12
-                                                                  .withOpacity(0),
-                                                              Colors.black,
-                                                            ]),
+                                                  ),
                                                       ),
-                                                      child: Text(
-                                                        newslist[index]
-                                                            .newsDec
-                                                            .substring(0, 55),
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                        ),
+                                                ));
+                                          },
+                                          child: Column(
+                                            children: [
+                                              Card(
+                                                elevation: 02,
+                                                shape: RoundedRectangleBorder(),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Stack(
+                                                    children: [
+                                                      ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(20),
+                                                          child: Image.network(
+                                                            newslist[index]
+                                                                .newsImg,
+                                                            fit: BoxFit.cover,
+                                                          )),
+                                                      Positioned(
+                                                        bottom: 8,
+                                                        left: 0,
+                                                        right: 9,
+                                                        child:
+                                                            Column(children: [
+                                                          Card(
+                                                            elevation: 0,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor
+                                                                .withOpacity(
+                                                                    0.8),
+                                                          ),
+                                                          Container(
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              gradient: LinearGradient(
+                                                                  begin: Alignment
+                                                                      .topCenter,
+                                                                  end: Alignment
+                                                                      .bottomCenter,
+                                                                  colors: [
+                                                                    Colors
+                                                                        .black12
+                                                                        .withOpacity(
+                                                                            0),
+                                                                    Colors
+                                                                        .black,
+                                                                  ]),
+                                                            ),
+                                                            child: Text(
+                                                              newslist[index]
+                                                                  .newsDec
+                                                                  .substring(
+                                                                      0, 55),
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                            ),
+                                                          )
+                                                        ]),
                                                       ),
-                                                    )
-                                                  ]),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                              Container(
+                                                decoration: BoxDecoration(),
+                                                child: Text(
+                                                  newslist[index].newsHead,
+                                                  style: TextStyle(
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                    );
-                                    }catch(e){print(e); return Container(); }
+                                      );
+                                    } catch (e) {
+                                      print(e);
+                                      return Container();
+                                    }
                                   },
                                 ),
-                            ),
+                              ),
                       ),
                       SizedBox(
                         height: 22,
@@ -371,8 +553,13 @@ class _HomeState extends State<Home> {
                         children: [
                           ElevatedButton(
                               onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => catagery(nav: 'ABP News'),)) ;
-                             },
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          catagery(nav: 'ABP News'),
+                                    ));
+                              },
                               child: Text("Show more"))
                         ],
                       )

@@ -11,9 +11,7 @@ class Content extends StatefulWidget {
 
   int ind;
   Content({required this.ind});
-
   // const Content({Key? key}) : super(key: key);
-
   @override
   State<Content> createState() => _ContentState();
 }
@@ -61,24 +59,18 @@ class _ContentState extends State<Content> {
   }
   @override
   Widget build(BuildContext context) {
+    var ind;
     return Scaffold(
       appBar: AppBar(
         title: Text("Content"),
         centerTitle: true,
       ),
       body: Container(
-        child: ListView.builder(
-
-            itemBuilder: (context, ind)
-          {
-            return Container(
-              padding: EdgeInsets.all(30),
-              child: Card(
-                child: Text(navv[ind].content),
-              ),
-            );
+        child: Builder(
+          builder: (context ) {
+            return Text(navv[ind].content);
           }
-          ,),
+        ),
 
       )
     );
