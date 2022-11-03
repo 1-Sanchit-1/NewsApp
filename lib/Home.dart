@@ -3,10 +3,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:newsapp/catagery.dart';
-import 'package:newsapp/content.dart';
+
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'models.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
